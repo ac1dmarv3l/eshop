@@ -16,7 +16,7 @@ export default function (Alpine) {
 
                 const formData = new FormData(event.target);
                 try {
-                    const response = await fetch('http://localhost:8010/AddToCartController.php', {
+                    const response = await fetch('http://localhost:8010/MakeOrderController.php', {
                         method: 'POST',
                         body: formData
                     });
