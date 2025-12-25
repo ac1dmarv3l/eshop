@@ -5,7 +5,7 @@ import './style.css';
 import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
-import form from './form.js';
-form(Alpine);
+import cart from './cart.js';
+cart(Alpine);
 
 Alpine.start();

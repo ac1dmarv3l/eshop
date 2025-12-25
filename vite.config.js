@@ -5,4 +5,13 @@ export default defineConfig({
     plugins: [
         tailwindcss(),
     ],
+    server: {
+        proxy: {
+            '/public': {
+                target: 'http://localhost:8010',
+                changeOrigin: true,
+                secure: false,
+            }
+        }
+    }
 })
