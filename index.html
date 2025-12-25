@@ -77,10 +77,10 @@
             <h4 class="text-3xl text-center uppercase font-bold p-3 wrap-anywhere">comprehensive carpentry
                 services</h4>
             <div class="p-5 flex flex-wrap justify-center gap-2 w-full">
-                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5">
-                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5">
-                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5">
-                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5">
+                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5" loading="lazy">
+                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5" loading="lazy">
+                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5" loading="lazy">
+                <img src="https://placehold.co/200x350/orange/white" alt="" class="w-full md:max-w-1/5" loading="lazy">
             </div>
             <button class="p-3 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">See more</button>
         </div>
@@ -91,29 +91,30 @@
              class="px-4 md:px-12 lg:px-18 py-8 md:py-12 lg:py-18 bg-white border-b border-gray-200">
             <h4 class="text-2xl md:text-3xl uppercase font-bold text-center mb-8">Our Products</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <template x-for="product in products" :key="product.id">
+                <template x-for="product in products" x-bind:key="product.id">
                     <div class="bg-white border border-gray-200 p-4 flex flex-col items-center">
-                        <img :src="product.image" :alt="product.alt" class="w-full mb-4">
+                        <img x-bind:src="product.image" x-bind:alt="product.alt" class="w-full mb-4">
                         <h5 class="font-bold" x-text="product.name"></h5>
                         <p class="text-gray-600" x-text="'$' + product.price"></p>
-                        <input type="number" :value="getQuantity(product.id)"
-                               @input="setQuantity(product.id, $event.target.value)" min="1" max="999"
-                               class="mt-2 p-2 border border-gray-200 w-16 text-center">
+                        <input type="number" x-bind:value="getQuantity(product.id)"
+                               x-on:input="setQuantity(product.id, $event.target.value)" min="1" max="999"
+                               class="mt-2 p-2 border border-gray-200 w-16 text-center hover:border-gray-500 focus:border-orange-500">
                         <button x-on:click="addToCart(product.id)"
-                                class="mt-2 p-2 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">Add to
-                            Cart
+                                class="mt-2 p-2 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">
+                            Add to Cart
                         </button>
                     </div>
                 </template>
             </div>
             <div class="text-center mt-8">
                 <button x-on:click="showCart = true"
-                        class="p-3 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">View Cart
+                        class="p-3 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">
+                    View Cart
                 </button>
             </div>
 
             <!-- cart modal -->
-            <div x-show="showCart" x-on:keydown.escape.window="showCart = false" style="display: none;"
+            <div x-show="showCart" x-transition x-on:keydown.escape.window="showCart = false"
                  class="fixed inset-0 z-50 text-center flex items-center justify-center bg-black bg-opacity-50"
                  x-on:click="showCart = false">
                 <div x-on:click.stop
@@ -121,60 +122,52 @@
                     <h4 class="text-2xl font-bold mb-4">Cart</h4>
                     <div x-show="cart.length === 0" class="text-center">Cart is empty</div>
                     <div x-show="cart.length > 0">
-                        <table class="w-full border-collapse border border-gray-200">
+                        <table class="w-full border-collapse border border-gray-50">
                             <thead>
                             <tr class="bg-gray-100">
-                                <th class="border border-gray-200 p-2">Product</th>
-                                <th class="border border-gray-200 p-2">Price</th>
-                                <th class="border border-gray-200 p-2">Quantity</th>
-                                <th class="border border-gray-200 p-2">Total</th>
-                                <th class="border border-gray-200 p-2">Actions</th>
+                                <th class="border border-gray-50 p-3">Product</th>
+                                <th class="border border-gray-50 p-3">Price</th>
+                                <th class="border border-gray-50 p-3">Quantity</th>
+                                <th class="border border-gray-50 p-3">Total</th>
+                                <th class="border border-gray-50 p-3">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <template x-for="item in cart" :key="item.id">
+                            <template x-for="item in cart" x-bind:key="item.id">
                                 <tr>
                                     <td class="border border-gray-200 p-2" x-text="item.name"></td>
                                     <td class="border border-gray-200 p-2" x-text="'$' + item.price"></td>
                                     <td class="border border-gray-200 p-2">
-                                        <input type="number" :value="item.quantity" min="1" max="999"
+                                        <input type="number" x-bind:value="item.quantity" min="1" max="999"
                                                x-on:input="updateQuantity(item.id, $event.target.value)"
-                                               class="w-16 p-1 border border-gray-200">
+                                               class="w-16 p-1 border border-gray-200  hover:border-gray-500 focus:border-orange-500">
                                     </td>
                                     <td class="border border-gray-200 p-2" x-text="'$' + item.total"></td>
                                     <td class="border border-gray-200 p-2">
                                         <button x-on:click="deleteItem(item.id)"
-                                                class="p-1 bg-red-600 text-white active:bg-red-500 cursor-pointer">
+                                                class="p-1 bg-red-600 text-white active:bg-red-500 cursor-pointer text-sm">
                                             Delete
                                         </button>
                                     </td>
                                 </tr>
                             </template>
+                            <tr>
+                                <td class="text-right p-3" colspan="5">
+                                    Total: $<span x-text="total"></span>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
-                        <div class="mt-4 text-right">
-                            <strong>Total: $<span x-text="total"></span></strong>
-                        </div>
+                        <h5 class="mt-10 text-xl font-bold mb-4">Make order now</h5>
                         <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <input type="email" x-model="email" placeholder="Email" required
-                                   class="p-2 border border-gray-200">
+                                   class="p-2 border border-gray-200 hover:border-gray-500 focus:border-orange-500">
                             <input type="tel" x-model="phone" placeholder="Phone" required
-                                   class="p-2 border border-gray-200">
+                                   class="p-2 border border-gray-200 hover:border-gray-500 focus:border-orange-500">
                         </div>
-                        <div class="mt-4 flex justify-between">
-                            <button x-on:click="showCart = false"
-                                    class="p-2 bg-gray-600 text-white active:bg-gray-500 cursor-pointer">
-                                <span class="flex gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                         stroke-width="1.5" stroke="currentColor" class="size-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
-                                    </svg>
-                                    Continue shopping
-                                </span>
-                            </button>
-                            <button x-on:click="checkout" :disabled="loading"
-                                    class="p-2 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">
+                        <div class="mt-8 flex flex-col gap-2 items-center">
+                            <button x-on:click="checkout" x-bind:disabled="loading"
+                                    class="p-4 bg-orange-600 text-white active:bg-orange-500 cursor-pointer">
                                 <span x-show="!loading" class="flex gap-2">
                                     Checkout
                                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -186,6 +179,17 @@
                                     </svg>
                                 </span>
                                 <span x-show="loading">Processing...</span>
+                            </button>
+                            <button x-on:click="showCart = false"
+                                    class="p-2 border border-gray-50 active:border-gray-200 cursor-pointer">
+                                <span class="flex gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                         stroke-width="1.5" stroke="currentColor" class="size-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+                                    </svg>
+                                    Continue shopping
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -257,7 +261,8 @@
             <div class="flex flex-col md:items-center md:justify-center lg:flex-row lg:items-center gap-2 px-4 md:px-12 lg:px-18 py-8 md:py-12 lg:py-18 bg-white border-b border-gray-200">
                 <div class="lg:w-1/2 flex justify-center">
                     <div class="relative md:mr-10">
-                        <img src="https://placehold.co/350x350/orange/white" alt="" class="w-10/12 md:w-full lg:w-md">
+                        <img src="https://placehold.co/350x350/orange/white" alt="" class="w-10/12 md:w-full lg:w-md"
+                             loading="lazy">
                         <div class="p-3 absolute max-w-20 md:max-w-40 bottom-0 right-0 md:-right-10 bg-gray-900 text-white">
                             lorem ipsum
                             dolor sit amet
