@@ -10,31 +10,37 @@ use GuzzleHttp\Exception\GuzzleException;
 class CartController
 {
     private const string CART_SESSION_KEY = 'cart';
+
+    private static array $productsCache = [];
+
     private array $products;
 
     private Client $client;
 
-    public function __construct()
+    public function __construct(Client $client)
     {
-        $this->client = new Client();
-        $this->products = require __DIR__ . '/../config/products.php';
-    }
+        $this->client = $client;
 
-    public function add(): void
-    {
+        if (empty(self::$productsCache)) {
+            self::$productsCache = require __DIR__ . '/../config/products.php';
+        }
+        $this->products = self::$productsCache;
+
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Credentials: true');
+    }
 
+    public function add(): array
+    {
         $productId = $_POST['product_id'] ?? '';
         $quantity = (int) ($_POST['quantity'] ?? 1);
 
-        if (empty($productId) || $quantity < 1 || $quantity > 999) {
-            echo json_encode(['success' => false, 'message' => 'Invalid data']);
-            exit;
+        if (empty($productId) || $quantity < 1 || $quantity > 999 || !isset($this->products[$productId])) {
+            return ['success' => false, 'message' => 'Invalid data'];
         }
 
-        $cart = $_SESSION[self::CART_SESSION_KEY] ?? [];
+        $cart = $this->getCart();
         if (isset($cart[$productId])) {
             $cart[$productId] += $quantity;
         } else {
@@ -42,24 +48,20 @@ class CartController
         }
 
         $_SESSION[self::CART_SESSION_KEY] = $cart;
-        echo json_encode(['success' => true, 'cart' => $this->getCartItems()]);
+
+        return ['success' => true, 'cart' => $this->getCartItems()];
     }
 
-    public function update(): void
+    public function update(): array
     {
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Credentials: true');
-
         $productId = $_POST['product_id'] ?? '';
         $quantity = (int) ($_POST['quantity'] ?? 0);
 
-        if (empty($productId) || $quantity < 0 || ($quantity > 0 && $quantity > 999)) {
-            echo json_encode(['success' => false, 'message' => 'Invalid data']);
-            exit;
+        if (empty($productId) || ($quantity < 0 || $quantity > 999) || (!isset($this->products[$productId]) && $quantity > 0)) {
+            return ['success' => false, 'message' => 'Invalid data'];
         }
 
-        $cart = $_SESSION[self::CART_SESSION_KEY] ?? [];
+        $cart = $this->getCart();
         if ($quantity === 0) {
             unset($cart[$productId]);
         } else {
@@ -67,69 +69,52 @@ class CartController
         }
 
         $_SESSION[self::CART_SESSION_KEY] = $cart;
-        echo json_encode(['success' => true, 'cart' => $this->getCartItems()]);
+
+        return ['success' => true, 'cart' => $this->getCartItems()];
     }
 
-    public function delete(): void
+    public function delete(): array
     {
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Credentials: true');
-
         $productId = $_POST['product_id'] ?? '';
 
         if (empty($productId)) {
-            echo json_encode(['success' => false, 'message' => 'Invalid data']);
-            exit;
+            return ['success' => false, 'message' => 'Invalid data'];
         }
 
-        $cart = $_SESSION[self::CART_SESSION_KEY] ?? [];
+        $cart = $this->getCart();
         unset($cart[$productId]);
         $_SESSION[self::CART_SESSION_KEY] = $cart;
 
-        echo json_encode(['success' => true, 'cart' => $this->getCartItems()]);
+        return ['success' => true, 'cart' => $this->getCartItems()];
     }
 
-    public function get(): void
+    public function get(): array
     {
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Credentials: true');
-
-        echo json_encode(['success' => true, 'cart' => $this->getCartItems()]);
+        return ['success' => true, 'cart' => $this->getCartItems()];
     }
 
-    public function getProducts(): void
+    public function getProducts(): array
     {
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-
         $products = [];
         foreach ($this->products as $id => $product) {
             $products[] = array_merge(['id' => $id], $product);
         }
 
-        echo json_encode(['success' => true, 'products' => $products]);
+        return ['success' => true, 'products' => $products];
     }
 
-    public function checkout(string $token, string $chatId): void
+    public function checkout(string $token, string $chatId): array
     {
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Credentials: true');
-
-        $cart = $_SESSION[self::CART_SESSION_KEY] ?? [];
+        $cart = $this->getCart();
         if (empty($cart)) {
-            echo json_encode(['success' => false, 'message' => 'Cart is empty']);
-            exit;
+            return ['success' => false, 'message' => 'Cart is empty'];
         }
 
         $email = $_POST['email'] ?? '';
         $phone = $_POST['phone'] ?? '';
 
-        if (empty($email) || empty($phone)) {
-            echo json_encode(['success' => false, 'message' => 'Email and phone are required']);
-            exit;
+        if (empty($email) || empty($phone) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'Email and phone are required, email must be valid'];
         }
 
         $message = "New order received:\n";
@@ -156,18 +141,26 @@ class CartController
 
             if ($responseData['ok']) {
                 $_SESSION[self::CART_SESSION_KEY] = [];
-                echo json_encode(['success' => true, 'message' => 'Order sent to Telegram']);
+
+                return ['success' => true, 'message' => 'Order sent to Telegram'];
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to send message to Telegram']);
+                return ['success' => false, 'message' => 'Failed to send message to Telegram'];
             }
         } catch (GuzzleException $e) {
-            echo json_encode(['success' => false, 'message' => 'Error sending message: ' . $e->getMessage()]);
+            error_log('Telegram send error: ' . $e->getMessage());
+
+            return ['success' => false, 'message' => 'Error sending message'];
         }
+    }
+
+    private function getCart(): array
+    {
+        return $_SESSION[self::CART_SESSION_KEY] ?? [];
     }
 
     private function getCartItems(): array
     {
-        $cart = $_SESSION[self::CART_SESSION_KEY] ?? [];
+        $cart = $this->getCart();
 
         $items = [];
         foreach ($cart as $productId => $quantity) {
