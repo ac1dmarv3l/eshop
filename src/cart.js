@@ -9,13 +9,21 @@ export default function (Alpine) {
             message: '',
             total: 0,
             products: [],
+            quantities: {},
+            showOrderForm: false,
             email: '',
             phone: '',
-            quantities: {},
+            cardNumber: '',
+            cardExpiryMonth: '',
+            cardExpiryYear: '',
+            cardCvv: '',
+            cardHolderName: '',
+
             init() {
                 this.loadProducts();
                 this.loadCart();
             },
+
             async loadCart() {
                 try {
                     const response = await fetch('/public/index.php', {
@@ -32,6 +40,7 @@ export default function (Alpine) {
                     console.error('Error loading cart:', error);
                 }
             },
+
             async loadProducts() {
                 try {
                     const response = await fetch('/public/index.php', {
@@ -46,15 +55,19 @@ export default function (Alpine) {
                     console.error('Error loading products:', error);
                 }
             },
+
             calculateTotal() {
                 this.total = this.cart.reduce((sum, item) => sum + item.total, 0);
             },
+
             getQuantity(productId) {
                 return this.quantities[productId] || 1;
             },
+
             setQuantity(productId, quantity) {
                 this.quantities[productId] = quantity;
             },
+
             async addToCart(productId) {
                 const quantity = this.getQuantity(productId);
                 try {
@@ -75,6 +88,7 @@ export default function (Alpine) {
                     this.message = 'Error adding to cart';
                 }
             },
+
             async updateQuantity(productId, quantity) {
                 quantity = parseInt(quantity);
                 if (quantity < 1 || quantity > 999) return;
@@ -95,6 +109,7 @@ export default function (Alpine) {
                     this.message = 'Error updating quantity';
                 }
             },
+
             async deleteItem(productId) {
                 try {
                     const response = await fetch('/public/index.php', {
@@ -113,17 +128,21 @@ export default function (Alpine) {
                     this.message = 'Error deleting item';
                 }
             },
+
             async checkout() {
                 if (this.cart.length === 0) {
                     this.message = 'Cart is empty';
                     return;
                 }
-                if (!this.email || !this.phone) {
-                    this.message = 'Please fill in email and phone';
+
+                if (!this.email || !this.phone || !this.cardNumber || !this.cardExpiryMonth || !this.cardExpiryYear || !this.cardCvv || !this.cardHolderName) {
+                    this.message = 'Please fill in all required fields';
                     return;
                 }
+
                 this.loading = true;
                 this.message = '';
+
                 try {
                     const response = await fetch('/public/index.php', {
                         method: 'POST',
@@ -131,7 +150,12 @@ export default function (Alpine) {
                         body: new URLSearchParams({
                             action: 'cart/checkout',
                             email: this.email,
-                            phone: this.phone
+                            phone: this.phone,
+                            cardNumber: this.cardNumber,
+                            cardExpiryMonth: this.cardExpiryMonth,
+                            cardExpiryYear: this.cardExpiryYear,
+                            cardCvv: this.cardCvv,
+                            cardHolderName: this.cardHolderName,
                         })
                     });
                     const result = await response.json();
@@ -141,6 +165,11 @@ export default function (Alpine) {
                         this.total = 0;
                         this.email = '';
                         this.phone = '';
+                        this.cardNumber = '';
+                        this.cardExpiryMonth = '';
+                        this.cardExpiryYear = '';
+                        this.cardCvv = '';
+                        this.cardHolderName = '';
                         this.showCart = false;
                     }
                 } catch (error) {

