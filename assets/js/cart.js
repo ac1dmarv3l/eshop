@@ -26,7 +26,7 @@ export default function (Alpine) {
 
             async loadCart() {
                 try {
-                    const response = await fetch('/public/index.php', {
+                    const response = await fetch('/api', {
                         method: 'POST',
                         credentials: 'include',
                         body: new URLSearchParams({ action: 'cart/get' })
@@ -43,7 +43,7 @@ export default function (Alpine) {
 
             async loadProducts() {
                 try {
-                    const response = await fetch('/public/index.php', {
+                    const response = await fetch('/api', {
                         method: 'POST',
                         body: new URLSearchParams({ action: 'products/get' })
                     });
@@ -71,7 +71,7 @@ export default function (Alpine) {
             async addToCart(productId) {
                 const quantity = this.getQuantity(productId);
                 try {
-                    const response = await fetch('/public/index.php', {
+                    const response = await fetch('/api', {
                         method: 'POST',
                         credentials: 'include',
                         body: new URLSearchParams({ action: 'cart/add', product_id: productId, quantity: quantity })
@@ -93,7 +93,7 @@ export default function (Alpine) {
                 quantity = parseInt(quantity);
                 if (quantity < 1 || quantity > 999) return;
                 try {
-                    const response = await fetch('/public/index.php', {
+                    const response = await fetch('/api', {
                         method: 'POST',
                         credentials: 'include',
                         body: new URLSearchParams({ action: 'cart/update', product_id: productId, quantity: quantity })
@@ -112,7 +112,7 @@ export default function (Alpine) {
 
             async deleteItem(productId) {
                 try {
-                    const response = await fetch('/public/index.php', {
+                    const response = await fetch('/api', {
                         method: 'POST',
                         credentials: 'include',
                         body: new URLSearchParams({ action: 'cart/delete', product_id: productId })
@@ -144,7 +144,7 @@ export default function (Alpine) {
                 this.message = '';
 
                 try {
-                    const response = await fetch('/public/index.php', {
+                    const response = await fetch('/api', {
                         method: 'POST',
                         credentials: 'include',
                         body: new URLSearchParams({

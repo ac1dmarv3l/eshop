@@ -2,12 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Ac1dmarv3l\Eshop\Controller;
+namespace App\Controller;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class CartController
+#[Route('/api', name: 'api', methods: ['POST'])]
+class CartController extends AbstractController
 {
     private const string CART_SESSION_KEY = 'cart';
 
@@ -15,20 +23,42 @@ class CartController
 
     private array $products;
 
-    private Client $client;
+    private HttpClientInterface $client;
 
-    public function __construct(Client $client)
+    private string $token;
+
+    private string $chatId;
+
+    public function __construct(HttpClientInterface $client, string $token, string $chatId)
     {
         $this->client = $client;
+        $this->token = $token;
+        $this->chatId = $chatId;
 
         if (empty(self::$productsCache)) {
             self::$productsCache = require __DIR__ . '/../config/products.php';
         }
         $this->products = self::$productsCache;
+    }
 
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Credentials: true');
+    public function __invoke(Request $request): Response
+    {
+        $action = $request->request->get('action', '');
+
+        $result = match ($action) {
+            'cart/add' => $this->add(),
+            'cart/update' => $this->update(),
+            'cart/delete' => $this->delete(),
+            'cart/get' => $this->get(),
+            'products/get' => $this->getProducts(),
+            'cart/checkout' => $this->checkout(),
+            default => ['success' => false, 'message' => 'Invalid action'],
+        };
+
+        return $this->json($result, 200, [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Credentials' => 'true',
+        ]);
     }
 
     public function add(): array
@@ -103,9 +133,10 @@ class CartController
         return ['success' => true, 'products' => $products];
     }
 
-    public function checkout(string $token, string $chatId): array
+    public function checkout(): array
     {
         $cart = $this->getCart();
+
         if (empty($cart)) {
             return ['success' => false, 'message' => 'Cart is empty'];
         }
@@ -150,15 +181,15 @@ class CartController
             "IP: $ip\n" .
             "User-Agent: $userAgent";
 
-        $url = 'https://api.telegram.org/bot' . $token . '/sendMessage';
+        $url = 'https://api.telegram.org/bot' . $this->token . '/sendMessage';
         $params = [
-            'chat_id' => $chatId,
+            'chat_id' => $this->chatId,
             'text' => $message,
         ];
 
         try {
-            $response = $this->client->post($url, ['form_params' => $params]);
-            $responseBody = $response->getBody()->getContents();
+            $response = $this->client->request('POST', $url, ['body' => $params]);
+            $responseBody = $response->getContent();
             $responseData = json_decode($responseBody, true);
 
             if ($responseData['ok']) {
@@ -168,7 +199,7 @@ class CartController
             } else {
                 return ['success' => false, 'message' => 'Failed to send message to Telegram'];
             }
-        } catch (GuzzleException $e) {
+        } catch (ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
             error_log('Telegram send error: ' . $e->getMessage());
 
             return ['success' => false, 'message' => 'Error sending message'];
