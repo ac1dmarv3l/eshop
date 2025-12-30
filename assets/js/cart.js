@@ -26,10 +26,9 @@ export default function (Alpine) {
 
             async loadCart() {
                 try {
-                    const response = await fetch('/api', {
-                        method: 'POST',
+                    const response = await fetch('/api/cart', {
+                        method: 'GET',
                         credentials: 'include',
-                        body: new URLSearchParams({ action: 'cart/get' })
                     });
                     const result = await response.json();
                     if (result.success) {
@@ -43,9 +42,8 @@ export default function (Alpine) {
 
             async loadProducts() {
                 try {
-                    const response = await fetch('/api', {
-                        method: 'POST',
-                        body: new URLSearchParams({ action: 'products/get' })
+                    const response = await fetch('/api/products', {
+                        method: 'GET',
                     });
                     const result = await response.json();
                     if (result.success) {
@@ -71,10 +69,10 @@ export default function (Alpine) {
             async addToCart(productId) {
                 const quantity = this.getQuantity(productId);
                 try {
-                    const response = await fetch('/api', {
+                    const response = await fetch('/api/cart/add', {
                         method: 'POST',
                         credentials: 'include',
-                        body: new URLSearchParams({ action: 'cart/add', product_id: productId, quantity: quantity })
+                        body: new URLSearchParams({ product_id: productId, quantity: quantity })
                     });
                     const result = await response.json();
                     if (result.success) {
@@ -93,10 +91,10 @@ export default function (Alpine) {
                 quantity = parseInt(quantity);
                 if (quantity < 1 || quantity > 999) return;
                 try {
-                    const response = await fetch('/api', {
-                        method: 'POST',
+                    const response = await fetch('/api/cart/update', {
+                        method: 'PATCH',
                         credentials: 'include',
-                        body: new URLSearchParams({ action: 'cart/update', product_id: productId, quantity: quantity })
+                        body: new URLSearchParams({ product_id: productId, quantity: quantity.toString() })
                     });
                     const result = await response.json();
                     if (result.success) {
@@ -112,10 +110,10 @@ export default function (Alpine) {
 
             async deleteItem(productId) {
                 try {
-                    const response = await fetch('/api', {
-                        method: 'POST',
+                    const response = await fetch('/api/cart/delete', {
+                        method: 'DELETE',
                         credentials: 'include',
-                        body: new URLSearchParams({ action: 'cart/delete', product_id: productId })
+                        body: new URLSearchParams({ product_id: productId })
                     });
                     const result = await response.json();
                     if (result.success) {
@@ -144,11 +142,10 @@ export default function (Alpine) {
                 this.message = '';
 
                 try {
-                    const response = await fetch('/api', {
+                    const response = await fetch('/api/cart/checkout', {
                         method: 'POST',
                         credentials: 'include',
                         body: new URLSearchParams({
-                            action: 'cart/checkout',
                             email: this.email,
                             phone: this.phone,
                             cardNumber: this.cardNumber,

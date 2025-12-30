@@ -7,8 +7,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    telegram_bot_token: '%env(TG_BOT_TOKEN)%'
-    telegram_chat_id: '%env(TG_CHAT_ID)%'
 
 services:
     # default configuration for services in *this* file
@@ -23,10 +21,10 @@ services:
         exclude:
             - '../src/config/*'
 
-    App\Controller\CartController:
+    App\Controller\Api\CheckoutController:
         arguments:
-            $token: '%telegram_bot_token%'
-            $chatId: '%telegram_chat_id%'
+            $token: '%env(string:TG_BOT_TOKEN)%'
+            $chatId: '%env(string:TG_CHAT_ID)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
