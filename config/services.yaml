@@ -19,9 +19,9 @@ services:
     App\:
         resource: '../src/'
         exclude:
-            - '../src/config/*'
+            - '../src/*/Infrastructure/config/*'
 
-    App\Controller\Api\CheckoutController:
+    App\Integration\Application\Controller\Api\CheckoutController:
         arguments:
             $token: '%env(string:TG_BOT_TOKEN)%'
             $chatId: '%env(string:TG_CHAT_ID)%'

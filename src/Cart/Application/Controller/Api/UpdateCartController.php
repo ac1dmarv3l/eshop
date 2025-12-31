@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Cart\Application\Controller\Api;
 
-use App\Dto\ProductDto;
-use App\Service\CartService;
+use App\Cart\Domain\Service\CartService;
+use App\Product\Application\Dto\ProductDto;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;

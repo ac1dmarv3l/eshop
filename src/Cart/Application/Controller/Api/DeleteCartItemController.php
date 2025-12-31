@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Cart\Application\Controller\Api;
 
-use App\Service\CartService;
+use App\Cart\Domain\Service\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
