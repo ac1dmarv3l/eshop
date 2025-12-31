@@ -18,23 +18,33 @@ class AddProductToCartController extends AbstractController
 
     public function __construct(
         private readonly CartService $cartService,
-        ProductsProviderService      $productsProviderService,
-    )
-    {
+        ProductsProviderService $productsProviderService,
+    ) {
         $this->products = $productsProviderService->getProducts();
     }
 
     public function __invoke(Request $request): Response
     {
-        $productId = $request->request->get('product_id', '');
-        $quantity = (int)($request->request->get('quantity', 1));
+        $productId = $request->request->get('productId', '');
+        $quantity = (int) $request->request->get('quantity', 1);
 
-        if (empty($productId) || $quantity < 1 || $quantity > 999 || !isset($this->products[$productId])) {
-            return $this->json(['success' => false, 'message' => 'Invalid data']);
+        if (
+            empty($productId) ||
+            $quantity < 1 ||
+            $quantity > 999 ||
+            !isset($this->products[$productId])
+        ) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Invalid data',
+            ]);
         }
 
         $this->cartService->addToCart($productId, $quantity);
 
-        return $this->json(['success' => true, 'cart' => $this->cartService->getCartItems()]);
+        return $this->json([
+            'success' => true,
+            'cart' => $this->cartService->getCartItems(),
+        ]);
     }
 }

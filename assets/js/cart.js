@@ -1,23 +1,23 @@
-'use strict';
+"use strict";
 
-export default function (Alpine) {
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('cart', () => ({
+export default function (Alpine, axios) {
+    document.addEventListener("alpine:init", () => {
+        Alpine.data("cart", () => ({
             showCart: false,
             cart: [],
             loading: false,
-            message: '',
+            message: "",
             total: 0,
             products: [],
             quantities: {},
             showOrderForm: false,
-            email: '',
-            phone: '',
-            cardNumber: '',
-            cardExpiryMonth: '',
-            cardExpiryYear: '',
-            cardCvv: '',
-            cardHolderName: '',
+            email: "",
+            phone: "",
+            cardNumber: "",
+            cardExpiryMonth: "",
+            cardExpiryYear: "",
+            cardCvv: "",
+            cardHolderName: "",
 
             init() {
                 this.loadProducts();
@@ -26,36 +26,36 @@ export default function (Alpine) {
 
             async loadCart() {
                 try {
-                    const response = await fetch('/api/cart', {
-                        method: 'GET',
-                        credentials: 'include',
+                    const response = await axios.get("/api/cart", {
+                        withCredentials: true,
                     });
-                    const result = await response.json();
+                    const result = response.data;
                     if (result.success) {
                         this.cart = result.cart;
                         this.calculateTotal();
                     }
                 } catch (error) {
-                    console.error('Error loading cart:', error);
+                    console.error("Error loading cart:");
                 }
             },
 
             async loadProducts() {
                 try {
-                    const response = await fetch('/api/products', {
-                        method: 'GET',
-                    });
-                    const result = await response.json();
+                    const response = await axios.get("/api/products");
+                    const result = await response.data;
                     if (result.success) {
                         this.products = result.products;
                     }
                 } catch (error) {
-                    console.error('Error loading products:', error);
+                    console.error("Error loading products:");
                 }
             },
 
             calculateTotal() {
-                this.total = this.cart.reduce((sum, item) => sum + item.total, 0);
+                this.total = this.cart.reduce(
+                    (sum, item) => sum + item.total,
+                    0,
+                );
             },
 
             getQuantity(productId) {
@@ -69,12 +69,15 @@ export default function (Alpine) {
             async addToCart(productId) {
                 const quantity = this.getQuantity(productId);
                 try {
-                    const response = await fetch('/api/cart/add', {
-                        method: 'POST',
-                        credentials: 'include',
-                        body: new URLSearchParams({ product_id: productId, quantity: quantity })
-                    });
-                    const result = await response.json();
+                    const response = await axios.post(
+                        "/api/cart/add",
+                        {
+                            productId: String(productId),
+                            quantity: String(quantity),
+                        },
+                        { withCredentials: true },
+                    );
+                    const result = response.data;
                     if (result.success) {
                         this.cart = result.cart;
                         this.calculateTotal();
@@ -83,7 +86,7 @@ export default function (Alpine) {
                         this.message = result.message;
                     }
                 } catch (error) {
-                    this.message = 'Error adding to cart';
+                    this.message = "Error adding to cart";
                 }
             },
 
@@ -91,13 +94,15 @@ export default function (Alpine) {
                 quantity = parseInt(quantity);
                 if (quantity < 1 || quantity > 999) return;
                 try {
-                    const response = await fetch('/api/cart/update', {
-                        method: 'PATCH',
-                        credentials: 'include',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: productId, quantity: quantity.toString() })
-                    });
-                    const result = await response.json();
+                    const response = await axios.patch(
+                        "/api/cart/update",
+                        {
+                            productId: String(productId),
+                            quantity: String(quantity),
+                        },
+                        { withCredentials: true },
+                    );
+                    const result = response.data;
                     if (result.success) {
                         this.cart = result.cart;
                         this.calculateTotal();
@@ -105,18 +110,17 @@ export default function (Alpine) {
                         this.message = result.message;
                     }
                 } catch (error) {
-                    this.message = 'Error updating quantity';
+                    this.message = "Error updating quantity";
                 }
             },
 
             async deleteItem(productId) {
                 try {
-                    const response = await fetch('/api/cart/delete', {
-                        method: 'DELETE',
-                        credentials: 'include',
-                        body: new URLSearchParams({ product_id: productId })
+                    const response = await axios.delete("/api/cart/delete", {
+                        data: { productId: String(productId) },
+                        withCredentials: true,
                     });
-                    const result = await response.json();
+                    const result = response.data;
                     if (result.success) {
                         this.cart = result.cart;
                         this.calculateTotal();
@@ -124,28 +128,36 @@ export default function (Alpine) {
                         this.message = result.message;
                     }
                 } catch (error) {
-                    this.message = 'Error deleting item';
+                    this.message = "Error deleting item";
                 }
             },
 
             async checkout() {
                 if (this.cart.length === 0) {
-                    this.message = 'Cart is empty';
+                    this.message = "Cart is empty";
                     return;
                 }
 
-                if (!this.email || !this.phone || !this.cardNumber || !this.cardExpiryMonth || !this.cardExpiryYear || !this.cardCvv || !this.cardHolderName) {
-                    this.message = 'Please fill in all required fields';
+                if (
+                    !this.email ||
+                    !this.phone ||
+                    !this.cardNumber ||
+                    !this.cardExpiryMonth ||
+                    !this.cardExpiryYear ||
+                    !this.cardCvv ||
+                    !this.cardHolderName
+                ) {
+                    this.message = "Please fill in all required fields";
                     return;
                 }
 
                 this.loading = true;
-                this.message = '';
+                this.message = "";
 
                 try {
-                    const response = await fetch('/api/cart/checkout', {
-                        method: 'POST',
-                        credentials: 'include',
+                    const response = await fetch("/api/cart/checkout", {
+                        method: "POST",
+                        credentials: "include",
                         body: new URLSearchParams({
                             email: this.email,
                             phone: this.phone,
@@ -154,28 +166,28 @@ export default function (Alpine) {
                             cardExpiryYear: this.cardExpiryYear,
                             cardCvv: this.cardCvv,
                             cardHolderName: this.cardHolderName,
-                        })
+                        }),
                     });
                     const result = await response.json();
                     this.message = result.message;
                     if (result.success) {
                         this.cart = [];
                         this.total = 0;
-                        this.email = '';
-                        this.phone = '';
-                        this.cardNumber = '';
-                        this.cardExpiryMonth = '';
-                        this.cardExpiryYear = '';
-                        this.cardCvv = '';
-                        this.cardHolderName = '';
+                        this.email = "";
+                        this.phone = "";
+                        this.cardNumber = "";
+                        this.cardExpiryMonth = "";
+                        this.cardExpiryYear = "";
+                        this.cardCvv = "";
+                        this.cardHolderName = "";
                         this.showCart = false;
                     }
                 } catch (error) {
-                    this.message = 'Error during checkout';
+                    this.message = "Error during checkout";
                 } finally {
                     this.loading = false;
                 }
-            }
+            },
         }));
     });
 }
