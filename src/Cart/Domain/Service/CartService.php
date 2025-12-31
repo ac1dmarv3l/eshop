@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Cart\Domain\Service;
 
+use App\Cart\Application\Exception\CartException;
+use App\Product\Infrastructure\Service\ProductsProviderService;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class CartService
@@ -40,13 +42,10 @@ final class CartService
         return $items;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function updateQuantity(string $productId, string $quantity): void
     {
         if ((!is_numeric($quantity) || (int)$quantity < 0 || (int)$quantity > 999) || (!isset($this->products[$productId]) && (int)$quantity > 0)) {
-            throw new \Exception('Invalid data');
+            throw CartException::fromString('Invalid data');
         }
 
         $cart = $this->getCart();

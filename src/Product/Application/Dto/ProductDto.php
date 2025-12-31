@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Dto;
+namespace App\Product\Application\Dto;
 
 use Symfony\Component\Validator\Constraints\NotBlank;
 
