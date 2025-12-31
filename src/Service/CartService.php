@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Service;
 
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 final class CartService
 {
@@ -14,8 +13,8 @@ final class CartService
     private array $products;
 
     public function __construct(
-        private RequestStack $requestStack,
-        ProductsProviderService $productsProviderService,
+        private readonly RequestStack $requestStack,
+        ProductsProviderService       $productsProviderService,
     )
     {
         $this->products = $productsProviderService->getProducts();
@@ -41,14 +40,21 @@ final class CartService
         return $items;
     }
 
-    public function updateQuantity(string $productId, int $quantity): void
+    /**
+     * @throws \Exception
+     */
+    public function updateQuantity(string $productId, string $quantity): void
     {
+        if ((!is_numeric($quantity) || (int)$quantity < 0 || (int)$quantity > 999) || (!isset($this->products[$productId]) && (int)$quantity > 0)) {
+            throw new \Exception('Invalid data');
+        }
+
         $cart = $this->getCart();
 
-        if ($quantity === 0) {
+        if ((int)$quantity === 0) {
             unset($cart[$productId]);
         } else {
-            $cart[$productId] = $quantity;
+            $cart[$productId] = (int)$quantity;
         }
 
         $this->requestStack->getSession()->set(self::CART_SESSION_KEY, $cart);

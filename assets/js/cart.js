@@ -94,7 +94,8 @@ export default function (Alpine) {
                     const response = await fetch('/api/cart/update', {
                         method: 'PATCH',
                         credentials: 'include',
-                        body: new URLSearchParams({ product_id: productId, quantity: quantity.toString() })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: productId, quantity: quantity.toString() })
                     });
                     const result = await response.json();
                     if (result.success) {
