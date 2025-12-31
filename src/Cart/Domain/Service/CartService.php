@@ -66,6 +66,15 @@ final class CartService
 
     public function addToCart(string $productId, int $quantity): void
     {
+        if (
+            empty($productId) ||
+            $quantity < 1 ||
+            $quantity > 999 ||
+            !isset($this->products[$productId])
+        ) {
+            throw CartException::fromString('Invalid data');
+        }
+
         $cart = $this->getCart();
 
         if (isset($cart[$productId])) {
