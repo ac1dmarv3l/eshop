@@ -1,11 +1,13 @@
-'use strict';
+"use strict";
 
-import './styles/style.css';
+import "./styles/style.css";
 
-import Alpine from 'alpinejs';
+import Alpine from "alpinejs";
 window.Alpine = Alpine;
 
-import cart from './js/cart.js';
-cart(Alpine);
+import axios from "axios";
+
+import cart from "./js/cart.js";
+cart(Alpine, axios);
 
 Alpine.start();
