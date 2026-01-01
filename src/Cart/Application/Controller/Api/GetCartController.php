@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Cart\Application\Controller\Api;
 
-use App\Cart\Domain\Service\CartService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Cart\Application\UseCase\Get\GetCartQueryHandler;
+use App\Common\Application\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -13,15 +13,15 @@ use Symfony\Component\Routing\Attribute\Route;
 final class GetCartController extends AbstractController
 {
     public function __construct(
-        private readonly CartService $cartService,
+        private readonly GetCartQueryHandler $getCartQueryHandler,
     )
     {
     }
 
     public function __invoke(): Response
     {
-        return $this->json(['success' => true, 'cart' => $this->cartService->getCartItems()]);
+        $result = $this->getCartQueryHandler->handle();
+
+        return $this->singleObjectResponse(['cart' => $result], Response::HTTP_OK);
     }
-
-
 }
