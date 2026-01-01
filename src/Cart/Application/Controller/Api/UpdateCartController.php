@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Cart\Application\Controller\Api;
 
+use App\Cart\Application\UseCase\Update\UpdateCartCommand;
+use App\Cart\Application\UseCase\Update\UpdateCartCommandHandler;
 use App\Cart\Domain\Service\CartService;
-use App\Product\Application\Dto\ProductDto;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Common\Application\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,17 +16,18 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UpdateCartController extends AbstractController
 {
     public function __construct(
-        private readonly CartService $cartService,
+        private readonly CartService              $cartService,
+        private readonly UpdateCartCommandHandler $updateCartCommandHandler,
     )
     {
     }
 
     public function __invoke(
-        #[MapRequestPayload] ProductDto $productDto,
+        #[MapRequestPayload] UpdateCartCommand $updateCartCommand,
     ): Response
     {
-        $this->cartService->updateQuantity($productDto->productId, $productDto->quantity);
+        $this->updateCartCommandHandler->handle($updateCartCommand);
 
-        return $this->json(['success' => true, 'cart' => $this->cartService->getCartItems()]);
+        return $this->singleObjectResponse(['cart' => $this->cartService->getCartItems()], Response::HTTP_OK);
     }
 }
