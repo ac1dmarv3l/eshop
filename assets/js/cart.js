@@ -30,7 +30,7 @@ export default function (Alpine, axios) {
                         withCredentials: true,
                     });
                     const result = response.data;
-                    if (result.success) {
+                    if (result.result) {
                         this.cart = result.cart;
                         this.calculateTotal();
                     }
@@ -117,13 +117,13 @@ export default function (Alpine, axios) {
 
             async deleteItem(productId) {
                 try {
-                    const response = await axios.delete("/api/cart/delete", {
+                    const response = await axios.delete("/api/cart", {
                         data: { productId: String(productId) },
                         withCredentials: true,
                     });
                     const result = response.data;
-                    if (result.success) {
-                        this.cart = result.cart;
+                    if (result.result) {
+                        await this.loadCart();
                         this.calculateTotal();
                     } else {
                         this.message = result.message;
