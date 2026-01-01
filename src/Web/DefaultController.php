@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Common\Application\Controller\Web;
+namespace App\Web;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +13,6 @@ final class DefaultController extends AbstractController
     #[Route('/', name: 'app_default')]
     public function __invoke(): Response
     {
-        return $this->render('default/index.html.twig', []);
+        return $this->render('default/index.html.twig');
     }
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Cart\Application\Controller\Api;
 
 use App\Cart\Domain\Service\CartService;
+use App\Common\Application\Controller\AbstractController;
 use App\Product\Application\Dto\ProductDto;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,9 +30,6 @@ class AddProductToCartController extends AbstractController
 
         $this->cartService->addToCart($productId, $quantity);
 
-        return $this->json([
-            'success' => true,
-            'cart' => $this->cartService->getCartItems(),
-        ]);
+        return $this->singleObjectResponse(null, Response::HTTP_OK);
     }
 }

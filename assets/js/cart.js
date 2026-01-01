@@ -78,11 +78,12 @@ export default function (Alpine, axios) {
                         { withCredentials: true },
                     );
                     const result = response.data;
-                    if (result.success) {
-                        this.cart = result.cart;
+                    if (result.result) {
+                        await this.loadCart();
                         this.calculateTotal();
                         this.showCart = true;
                     } else {
+                        // the message is not sent by backend by now so it's not handling
                         this.message = result.message;
                     }
                 } catch (error) {
@@ -103,7 +104,7 @@ export default function (Alpine, axios) {
                         { withCredentials: true },
                     );
                     const result = response.data;
-                    if (result.success) {
+                    if (result.result) {
                         this.cart = result.cart;
                         this.calculateTotal();
                     } else {
