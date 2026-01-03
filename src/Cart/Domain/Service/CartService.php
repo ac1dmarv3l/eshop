@@ -42,7 +42,7 @@ final class CartService
         return $items;
     }
 
-    public function updateQuantity(string $productId, string $quantity): void
+    public function updateCart(string $productId, string $quantity): void
     {
         if ((!is_numeric($quantity) || (int)$quantity < 0 || (int)$quantity > 999) || (!isset($this->products[$productId]) && (int)$quantity > 0)) {
             throw CartException::fromString('Invalid data');
@@ -82,15 +82,6 @@ final class CartService
         } else {
             $cart[$productId] = $quantity;
         }
-
-        $this->requestStack->getSession()->set(self::CART_SESSION_KEY, $cart);
-    }
-
-    public function removeFromCart(string $productId): void
-    {
-        $cart = $this->getCart();
-
-        unset($cart[$productId]);
 
         $this->requestStack->getSession()->set(self::CART_SESSION_KEY, $cart);
     }

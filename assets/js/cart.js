@@ -75,7 +75,7 @@ export default function (Alpine, axios) {
                             productId: String(productId),
                             quantity: String(quantity),
                         },
-                        { withCredentials: true },
+                        {withCredentials: true},
                     );
                     const result = response.data;
                     if (result.result) {
@@ -91,45 +91,45 @@ export default function (Alpine, axios) {
                 }
             },
 
-            async updateQuantity(productId, quantity) {
+            async update(productId, quantity) {
                 quantity = parseInt(quantity);
-                if (quantity < 1 || quantity > 999) return;
+                if (quantity < 0 || quantity > 9999) return;
+
+                const item = this.cart.find(item => item.id === productId);
+                if (!item) return;
+
+                const oldQuantity = item.quantity;
+                const oldTotal = item.total;
+
+                item.quantity = quantity;
+                item.total = item.price * quantity;
+                this.calculateTotal();
+
                 try {
                     const response = await axios.patch(
-                        "/api/cart/update",
+                        "/api/v1/cart",
                         {
                             productId: String(productId),
                             quantity: String(quantity),
                         },
-                        { withCredentials: true },
+                        {withCredentials: true},
                     );
-                    const result = response.data;
-                    if (result.result) {
-                        this.cart = result.cart;
-                        this.calculateTotal();
-                    } else {
-                        this.message = result.message;
-                    }
-                } catch (error) {
-                    this.message = "Error updating quantity";
-                }
-            },
 
-            async deleteItem(productId) {
-                try {
-                    const response = await axios.delete("/api/cart", {
-                        data: { productId: String(productId) },
-                        withCredentials: true,
-                    });
-                    const result = response.data;
-                    if (result.result) {
-                        await this.loadCart();
-                        this.calculateTotal();
+                    if (response.status === 204) {
+                        if (quantity === 0) {
+                            this.cart = this.cart.filter(cartItem => cartItem.id !== productId);
+                        }
                     } else {
-                        this.message = result.message;
+                        item.quantity = oldQuantity;
+                        item.total = oldTotal;
+                        this.calculateTotal();
+                        this.message = response.data.message || "Error updating cart";
                     }
                 } catch (error) {
-                    this.message = "Error deleting item";
+                    item.quantity = oldQuantity;
+                    item.total = oldTotal;
+                    this.calculateTotal();
+                    this.message = "Error updating cart";
                 }
             },
 

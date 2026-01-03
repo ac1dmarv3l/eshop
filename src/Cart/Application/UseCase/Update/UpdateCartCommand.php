@@ -12,5 +12,5 @@ final class UpdateCartCommand
     public string $productId;
 
     #[NotBlank]
-    public string $quantity;
+    public ?string $quantity = null;
 }
