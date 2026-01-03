@@ -68,25 +68,60 @@ export default function (Alpine, axios) {
 
             async addToCart(productId) {
                 const quantity = this.getQuantity(productId);
+                const product = this.products.find(p => p.id === productId);
+                if (!product) return;
+
+                const item = this.cart.find(item => item.id === productId);
+                let isNewItem = false;
+                let oldQuantity = 0;
+                let oldTotal = 0;
+
+                if (item) {
+                    oldQuantity = item.quantity;
+                    oldTotal = item.total;
+                    item.quantity += quantity;
+                    item.total = item.price * item.quantity;
+                } else {
+                    isNewItem = true;
+                    this.cart.push({
+                        id: productId,
+                        name: product.name,
+                        price: product.price,
+                        quantity: quantity,
+                        total: product.price * quantity,
+                    });
+                }
+                this.calculateTotal();
+                this.showCart = true;
+
                 try {
                     const response = await axios.post(
-                        "/api/cart/add",
+                        "/api/v1/cart",
                         {
                             productId: String(productId),
-                            quantity: String(quantity),
+                            quantity: quantity,
                         },
                         {withCredentials: true},
                     );
                     const result = response.data;
-                    if (result.result) {
-                        await this.loadCart();
+                    if (!result.result) {
+                        if (isNewItem) {
+                            this.cart = this.cart.filter(cartItem => cartItem.id !== productId);
+                        } else {
+                            item.quantity = oldQuantity;
+                            item.total = oldTotal;
+                        }
                         this.calculateTotal();
-                        this.showCart = true;
-                    } else {
-                        // the message is not sent by backend by now so it's not handling
                         this.message = result.message;
                     }
                 } catch (error) {
+                    if (isNewItem) {
+                        this.cart = this.cart.filter(cartItem => cartItem.id !== productId);
+                    } else {
+                        item.quantity = oldQuantity;
+                        item.total = oldTotal;
+                    }
+                    this.calculateTotal();
                     this.message = "Error adding to cart";
                 }
             },
