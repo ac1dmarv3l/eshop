@@ -142,12 +142,12 @@
                                     <td class="border border-gray-200 p-2" x-text="'$' + item.price"></td>
                                     <td class="border border-gray-200 p-2">
                                         <input type="number" x-bind:value="item.quantity" min="1" max="999"
-                                               x-on:input.throttle.500ms="updateQuantity(item.id, $event.target.value)"
+                                               x-on:input.throttle.500ms="update(item.id, $event.target.value)"
                                                class="w-16 p-1 border border-gray-200  hover:border-gray-500 focus:border-orange-500">
                                     </td>
                                     <td class="border border-gray-200 p-2" x-text="'$' + item.total"></td>
                                     <td class="border border-gray-200 p-2">
-                                        <button x-on:click="deleteItem(item.id)"
+                                        <button x-on:click="update(item.id, 0)"
                                                 class="p-1 bg-red-600 text-white active:bg-red-500 cursor-pointer text-sm">
                                             Delete
                                         </button>

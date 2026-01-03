@@ -16,6 +16,6 @@ final readonly class UpdateCartCommandHandler
 
     public function handle(UpdateCartCommand $updateCartCommand): void
     {
-        $this->cartService->updateQuantity($updateCartCommand->productId, $updateCartCommand->quantity);
+        $this->cartService->updateCart($updateCartCommand->productId, $updateCartCommand->quantity);
     }
 }

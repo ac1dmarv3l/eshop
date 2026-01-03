@@ -12,11 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/api/cart/update', methods: ['PATCH'])]
+#[Route(path: '/api/v1/cart', methods: ['PATCH'])]
 final class UpdateCartController extends AbstractController
 {
     public function __construct(
-        private readonly CartService              $cartService,
         private readonly UpdateCartCommandHandler $updateCartCommandHandler,
     )
     {
@@ -28,6 +27,6 @@ final class UpdateCartController extends AbstractController
     {
         $this->updateCartCommandHandler->handle($updateCartCommand);
 
-        return $this->singleObjectResponse(['cart' => $this->cartService->getCartItems()], Response::HTTP_OK);
+        return $this->singleObjectResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
