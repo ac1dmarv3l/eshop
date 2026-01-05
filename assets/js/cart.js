@@ -13,6 +13,8 @@ export default function (Alpine, axios) {
             showOrderForm: false,
             email: "",
             phone: "",
+            firstName: "",
+            lastName: "",
             cardNumber: "",
             cardExpiryMonth: "",
             cardExpiryYear: "",
@@ -177,6 +179,8 @@ export default function (Alpine, axios) {
                 if (
                     !this.email ||
                     !this.phone ||
+                    !this.firstName ||
+                    !this.lastName ||
                     !this.cardNumber ||
                     !this.cardExpiryMonth ||
                     !this.cardExpiryYear ||
@@ -191,26 +195,30 @@ export default function (Alpine, axios) {
                 this.message = "";
 
                 try {
-                    const response = await fetch("/api/cart/checkout", {
-                        method: "POST",
-                        credentials: "include",
-                        body: new URLSearchParams({
+                    const response = await axios.post(
+                        "/api/v1/checkout",
+                        {
                             email: this.email,
                             phone: this.phone,
-                            cardNumber: this.cardNumber,
-                            cardExpiryMonth: this.cardExpiryMonth,
-                            cardExpiryYear: this.cardExpiryYear,
-                            cardCvv: this.cardCvv,
+                            firstName: this.firstName,
+                            lastName: this.lastName,
+                            cardNumber: parseInt(this.cardNumber),
+                            cardExpiryMonth: parseInt(this.cardExpiryMonth),
+                            cardExpiryYear: parseInt(this.cardExpiryYear),
+                            cardCvv: parseInt(this.cardCvv),
                             cardHolderName: this.cardHolderName,
-                        }),
-                    });
-                    const result = await response.json();
-                    this.message = result.message;
-                    if (result.success) {
+                        },
+                        {withCredentials: true},
+                    );
+                    const result = response.data;
+                    this.message = result.message || "";
+                    if (result.result) {
                         this.cart = [];
                         this.total = 0;
                         this.email = "";
                         this.phone = "";
+                        this.firstName = "";
+                        this.lastName = "";
                         this.cardNumber = "";
                         this.cardExpiryMonth = "";
                         this.cardExpiryYear = "";
