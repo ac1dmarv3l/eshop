@@ -21,10 +21,10 @@ services:
         exclude:
             - '../src/*/Infrastructure/config/*'
 
-    App\Integration\Application\Controller\Api\CheckoutController:
+    App\Integration\Application\UseCase\Checkout\CheckoutCommandHandler:
         arguments:
-            $token: '%env(string:TG_BOT_TOKEN)%'
-            $chatId: '%env(string:TG_CHAT_ID)%'
+            $token: '%env(string:TELEGRAM_BOT_TOKEN)%'
+            $chatId: '%env(string:TELEGRAM_CHAT_ID)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
