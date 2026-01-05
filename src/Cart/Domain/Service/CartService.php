@@ -32,6 +32,8 @@ final class CartService
                 $items[] = [
                     'id' => $productId,
                     'name' => $this->products[$productId]['name'],
+                    'image' => $this->products[$productId]['image'],
+                    'alt' => $this->products[$productId]['alt'],
                     'price' => $this->products[$productId]['price'],
                     'quantity' => $quantity,
                     'total' => $this->products[$productId]['price'] * $quantity,

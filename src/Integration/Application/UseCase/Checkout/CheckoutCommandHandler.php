@@ -5,17 +5,22 @@ declare(strict_types=1);
 namespace App\Integration\Application\UseCase\Checkout;
 
 use App\Cart\Domain\Service\CartService;
+use App\Product\Infrastructure\Service\ProductsProviderService;
 use Symfony\Component\Notifier\Bridge\Telegram\TelegramOptions;
 use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\Message\ChatMessage;
 
 final readonly class CheckoutCommandHandler
 {
+    private array $products;
+
     public function __construct(
         private CartService      $cartService,
         private ChatterInterface $chatter,
+        ProductsProviderService $productsProviderService,
     )
     {
+        $this->products = $productsProviderService->getProducts();
     }
 
     public function handle(CheckoutCommand $checkoutCommand): void
