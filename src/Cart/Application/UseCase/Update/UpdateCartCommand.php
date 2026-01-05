@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Dto;
+namespace App\Cart\Application\UseCase\Update;
 
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-final class ProductDto
+final class UpdateCartCommand
 {
     #[NotBlank]
     public string $productId;
 
     #[NotBlank]
-    public string $quantity;
+    public ?string $quantity = null;
 }

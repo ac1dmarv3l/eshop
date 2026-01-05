@@ -121,7 +121,7 @@
                  class="fixed inset-0 z-50 text-center flex items-center justify-center bg-black bg-opacity-50"
                  x-on:click="showCart = false">
                 <div x-on:click.stop
-                     class="bg-white px-4 md:px-12 lg:px-18 py-8 md:py-12 lg:py-18 max-w-2xl w-full mx-4 max-h-fit overflow-y-auto">
+                     class="bg-white px-4 md:px-12 lg:px-18 py-8 md:py-12 lg:py-18 max-w-2xl w-full mx-4 my-5 max-h-screen overflow-auto">
                     <h4 class="text-2xl font-bold mb-4">Cart</h4>
                     <div x-show="cart.length === 0" class="text-center">Cart is empty</div>
                     <div x-show="cart.length > 0">
@@ -142,12 +142,12 @@
                                     <td class="border border-gray-200 p-2" x-text="'$' + item.price"></td>
                                     <td class="border border-gray-200 p-2">
                                         <input type="number" x-bind:value="item.quantity" min="1" max="999"
-                                               x-on:input="updateQuantity(item.id, $event.target.value)"
+                                               x-on:input.throttle.500ms="update(item.id, $event.target.value)"
                                                class="w-16 p-1 border border-gray-200  hover:border-gray-500 focus:border-orange-500">
                                     </td>
                                     <td class="border border-gray-200 p-2" x-text="'$' + item.total"></td>
                                     <td class="border border-gray-200 p-2">
-                                        <button x-on:click="deleteItem(item.id)"
+                                        <button x-on:click="update(item.id, 0)"
                                                 class="p-1 bg-red-600 text-white active:bg-red-500 cursor-pointer text-sm">
                                             Delete
                                         </button>
@@ -182,6 +182,10 @@
                                 <input type="email" x-model="email" placeholder="Email" required
                                        class="p-2 border border-gray-200 hover:border-gray-500 focus:border-orange-500">
                                 <input type="tel" x-model="phone" placeholder="Phone" required
+                                       class="p-2 border border-gray-200 hover:border-gray-500 focus:border-orange-500">
+                                <input type="text" x-model="firstName" placeholder="First name" required
+                                       class="p-2 border border-gray-200 hover:border-gray-500 focus:border-orange-500">
+                                <input type="text" x-model="lastName" placeholder="Last name" required
                                        class="p-2 border border-gray-200 hover:border-gray-500 focus:border-orange-500">
                             </div>
                             <div id="card" class="w-full lg:w-10/12">

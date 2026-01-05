@@ -19,12 +19,7 @@ services:
     App\:
         resource: '../src/'
         exclude:
-            - '../src/config/*'
-
-    App\Controller\Api\CheckoutController:
-        arguments:
-            $token: '%env(string:TG_BOT_TOKEN)%'
-            $chatId: '%env(string:TG_CHAT_ID)%'
+            - '../src/*/Infrastructure/config/*'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
