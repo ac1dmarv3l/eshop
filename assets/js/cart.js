@@ -69,7 +69,7 @@ export default function (Alpine, axios) {
             },
 
             async addToCart(productId) {
-                const quantity = this.getQuantity(productId);
+                const quantity = parseInt(this.getQuantity(productId));
                 if (quantity < 1 || quantity > 9999) return;
 
                 const product = this.products.find(p => p.id === productId);
@@ -103,7 +103,7 @@ export default function (Alpine, axios) {
                         "/api/v1/cart",
                         {
                             productId: String(productId),
-                            quantity: parseInt(quantity),
+                            quantity: quantity,
                         },
                         {withCredentials: true},
                     );
