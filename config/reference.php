@@ -608,7 +608,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         decryption_env_var?: scalar|null, // Default: "base64:default::SYMFONY_DECRYPTION_SECRET"
  *     },
  *     notifier?: bool|array{ // Notifier configuration
- *         enabled?: bool, // Default: false
+ *         enabled?: bool, // Default: true
  *         message_bus?: scalar|null, // The message bus to use. Defaults to the default bus if the Messenger component is installed. // Default: null
  *         chatter_transports?: array<string, scalar|null>,
  *         texter_transports?: array<string, scalar|null>,
