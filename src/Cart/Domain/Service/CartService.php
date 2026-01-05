@@ -44,7 +44,7 @@ final class CartService
 
     public function updateCart(string $productId, string $quantity): void
     {
-        if ((!is_numeric($quantity) || (int)$quantity < 0 || (int)$quantity > 999) || (!isset($this->products[$productId]) && (int)$quantity > 0)) {
+        if ((!is_numeric($quantity) || (int)$quantity < 0 || (int)$quantity > 9999) || (!isset($this->products[$productId]) && (int)$quantity > 0)) {
             throw CartException::fromString('Invalid data');
         }
 
@@ -69,7 +69,7 @@ final class CartService
         if (
             empty($productId) ||
             $quantity < 1 ||
-            $quantity > 999 ||
+            $quantity > 9999 ||
             !isset($this->products[$productId])
         ) {
             throw CartException::fromString('Invalid data');
