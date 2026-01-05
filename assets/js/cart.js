@@ -44,7 +44,7 @@ export default function (Alpine, axios) {
             async loadProducts() {
                 try {
                     const response = await axios.get("/api/products");
-                    const result = await response.data;
+                    const result = response.data;
                     if (result.success) {
                         this.products = result.products;
                     }
@@ -70,6 +70,8 @@ export default function (Alpine, axios) {
 
             async addToCart(productId) {
                 const quantity = this.getQuantity(productId);
+                if (quantity < 1 || quantity > 9999) return;
+
                 const product = this.products.find(p => p.id === productId);
                 if (!product) return;
 
@@ -101,7 +103,7 @@ export default function (Alpine, axios) {
                         "/api/v1/cart",
                         {
                             productId: String(productId),
-                            quantity: quantity,
+                            quantity: parseInt(quantity),
                         },
                         {withCredentials: true},
                     );
