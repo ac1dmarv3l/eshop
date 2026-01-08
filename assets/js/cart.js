@@ -90,7 +90,7 @@ export default function (Alpine, axios) {
                     this.cart.push({
                         id: productId,
                         name: product.name,
-                        image: product.image,
+                        imageUrl: product.imageUrl,
                         price: product.price,
                         quantity: quantity,
                         total: product.price * quantity,
