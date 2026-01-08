@@ -9,7 +9,7 @@ use App\Common\Application\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/api/cart', methods: ['GET'])]
+#[Route(path: '/api/v1/cart', methods: ['GET'])]
 final class GetCartController extends AbstractController
 {
     public function __construct(
