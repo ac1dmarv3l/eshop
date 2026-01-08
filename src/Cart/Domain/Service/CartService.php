@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Cart\Domain\Service;
 
 use App\Cart\Application\Exception\CartException;
-use App\Product\Infrastructure\Service\ProductsProviderService;
+use App\Product\Domain\Product;
+use App\Product\Infrastructure\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class CartService
@@ -16,10 +17,20 @@ final class CartService
 
     public function __construct(
         private readonly RequestStack $requestStack,
-        ProductsProviderService       $productsProviderService,
+        ProductRepository $productRepository,
     )
     {
-        $this->products = $productsProviderService->getProducts();
+        $products = $productRepository->findAll();
+        $this->products = [];
+        /** @var Product $product */
+        foreach ($products as $product) {
+            $this->products[$product->getId()] = [
+                'name' => $product->getName(),
+                'price' => $product->getPrice(),
+                'imageUrl' => $product->getImageUrl(),
+                'alt' => $product->getName(),
+            ];
+        }
     }
 
     public function getCartItems(): array
@@ -32,7 +43,7 @@ final class CartService
                 $items[] = [
                     'id' => $productId,
                     'name' => $this->products[$productId]['name'],
-                    'image' => $this->products[$productId]['image'],
+                    'imageUrl' => $this->products[$productId]['imageUrl'],
                     'alt' => $this->products[$productId]['alt'],
                     'price' => $this->products[$productId]['price'],
                     'quantity' => $quantity,
