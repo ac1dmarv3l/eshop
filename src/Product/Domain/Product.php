@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Product\Domain;
 
+use App\Product\Domain\ValueObject\Price;
 use Doctrine\ORM\Mapping as ORM;
 
 /** @final */
@@ -22,8 +23,8 @@ class Product
     #[ORM\Column(name: 'description', type: 'text', nullable: true)]
     private ?string $description;
 
-    #[ORM\Column(name: 'price', type: 'string')]
-    private string $price;
+    #[ORM\Embedded(Price::class)]
+    private Price $price;
 
     #[ORM\Column(name: 'image_url', type: 'string', length: 500, nullable: true)]
     private ?string $imageUrl;
@@ -31,7 +32,7 @@ class Product
     private function __construct(
         string $name,
         string $description,
-        string $price,
+        Price $price,
         string $imageUrl
     )
     {
@@ -44,7 +45,7 @@ class Product
     public static function create(
         string $name,
         string $description,
-        string $price,
+        Price $price,
         string $imageUrl
     ): self
     {
@@ -71,7 +72,7 @@ class Product
         return $this->description;
     }
 
-    public function getPrice(): string
+    public function getPrice(): Price
     {
         return $this->price;
     }

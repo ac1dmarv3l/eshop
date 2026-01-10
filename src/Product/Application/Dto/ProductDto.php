@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Product\Application\Dto;
 
 use App\Product\Domain\Product;
+use App\Product\Domain\ValueObject\Price;
 
 final readonly class ProductDto
 {
@@ -12,7 +13,8 @@ final readonly class ProductDto
         public int $id,
         public string $name,
         public ?string $description,
-        public string $price,
+        public float $priceAmount,
+        public string $priceCurrency,
         public ?string $imageUrl,
     ) {}
 
@@ -22,7 +24,8 @@ final readonly class ProductDto
             id: $product->getId(),
             name: $product->getName(),
             description: $product->getDescription(),
-            price: $product->getPrice(),
+            priceAmount: $product->getPrice()->getOriginalAmount(),
+            priceCurrency: $product->getPrice()->getCurrency(),
             imageUrl: $product->getImageUrl(),
         );
     }

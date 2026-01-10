@@ -110,9 +110,9 @@
                             <img x-bind:src="product.imageUrl" x-bind:alt="product.name"
                                  class="w-full h-48 object-cover mb-4">
                             <h5 class="font-bold text-nowrap" x-text="product.name"></h5>
-                            <p class="text-gray-600" x-text="'$' + product.price"></p>
+                            <p class="text-gray-600" x-text="product.priceCurrency + ' ' + product.priceAmount.toFixed(2)"></p>
                             <input type="number" x-bind:value="getQuantity(product.id)"
-                                   x-on:input="setQuantity(product.id, $event.target.value)" min="1" max="999"
+                                   x-on:input="setQuantity(product.id, $event.target.value)" min="1" max="9999"
                                    class="my-2 p-2 input-border w-16 text-center">
                             <button x-on:click="addToCart(product.id)"
                                     class="button">
@@ -155,13 +155,13 @@
                                                  class="w-12 h-12 md:w-16 md:h-16 object-cover">
                                             <span x-text="item.name" class="text-center md:text-left"></span>
                                         </td>
-                                        <td class="p-1 md:p-3 " x-text="'$' + item.price"></td>
+                                        <td class="p-1 md:p-3 " x-text="item.priceCurrency + ' ' + item.priceAmount.toFixed(2)"></td>
                                         <td class="p-1 md:p-3 ">
-                                            <input type="number" x-bind:value="item.quantity" min="1" max="999"
-                                                   x-on:input.throttle.500ms="update(item.id, $event.target.value)"
+                                            <input type="number" x-bind:value="item.quantity" min="1" max="9999"
+                                                   x-on:input.throttle.300ms="update(item.id, $event.target.value)"
                                                    class="w-16 p-1 input-border">
                                         </td>
-                                        <td class="p-1 md:p-3 " x-text="'$' + item.total"></td>
+                                        <td class="p-1 md:p-3 " x-text="'$' + item.total.toFixed(2)"></td>
                                         <td class="p-1 md:p-3 ">
                                             <button x-on:click="update(item.id, 0)"
                                                     class="p-1 bg-red-600 text-white active:bg-red-500 cursor-pointer text-sm">
@@ -176,7 +176,7 @@
                                 </template>
                                 <tr>
                                     <td class="text-right p-3" colspan="5">
-                                        Total: $<span x-text="total"></span>
+                                        Total: $<span x-text="total.toFixed(2)"></span>
                                     </td>
                                 </tr>
                                 </tbody>

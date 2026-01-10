@@ -26,7 +26,8 @@ final class CartService
         foreach ($products as $product) {
             $this->products[$product->getId()] = [
                 'name' => $product->getName(),
-                'price' => $product->getPrice(),
+                'priceAmount' => $product->getPrice()->getOriginalAmount(),
+                'priceCurrency' => $product->getPrice()->getCurrency(),
                 'imageUrl' => $product->getImageUrl(),
                 'alt' => $product->getName(),
             ];
@@ -45,9 +46,10 @@ final class CartService
                     'name' => $this->products[$productId]['name'],
                     'imageUrl' => $this->products[$productId]['imageUrl'],
                     'alt' => $this->products[$productId]['alt'],
-                    'price' => $this->products[$productId]['price'],
+                    'priceAmount' => $this->products[$productId]['priceAmount'],
+                    'priceCurrency' => $this->products[$productId]['priceCurrency'],
                     'quantity' => $quantity,
-                    'total' => $this->products[$productId]['price'] * $quantity,
+                    'total' => $this->products[$productId]['priceAmount'] * $quantity,
                 ];
             }
         }

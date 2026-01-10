@@ -28,12 +28,14 @@ export default function (Alpine, axios) {
 
             async loadCart() {
                 try {
-                    const response = await axios.get("/api/cart", {
+                    const response = await axios.get("/api/v1/cart", {
                         withCredentials: true,
                     });
                     const result = response.data;
                     if (result.result) {
-                        this.cart = result.cart;
+                        this.cart = result.cart.map((item => ({
+                            ...item, total: parseFloat(item.total || 0),
+                        })));
                         this.calculateTotal();
                     }
                 } catch (error) {
@@ -43,7 +45,7 @@ export default function (Alpine, axios) {
 
             async loadProducts() {
                 try {
-                    const response = await axios.get("/api/products");
+                    const response = await axios.get("/api/v1/products");
                     const result = response.data;
                     if (result.success) {
                         this.products = result.products;
@@ -69,6 +71,7 @@ export default function (Alpine, axios) {
             },
 
             async addToCart(productId) {
+                // add handling instead of return
                 const quantity = parseInt(this.getQuantity(productId));
                 if (quantity < 1 || quantity > 9999) return;
 
@@ -84,16 +87,17 @@ export default function (Alpine, axios) {
                     oldQuantity = item.quantity;
                     oldTotal = item.total;
                     item.quantity += quantity;
-                    item.total = item.price * item.quantity;
+                    item.total = item.priceAmount * item.quantity;
                 } else {
                     isNewItem = true;
                     this.cart.push({
                         id: productId,
                         name: product.name,
                         imageUrl: product.imageUrl,
-                        price: product.price,
+                        priceAmount: product.priceAmount,
+                        priceCurrency: product.priceCurrency,
                         quantity: quantity,
-                        total: product.price * quantity,
+                        total: product.priceAmount * quantity,
                     });
                 }
                 this.calculateTotal();
@@ -142,7 +146,7 @@ export default function (Alpine, axios) {
                 const oldTotal = item.total;
 
                 item.quantity = quantity;
-                item.total = item.price * quantity;
+                item.total = item.priceAmount * quantity;
                 this.calculateTotal();
 
                 try {
